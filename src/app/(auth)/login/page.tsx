@@ -1,6 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -8,10 +10,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
-import { Building2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Building2, Mail, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-// Using an SVG for the Google logo as it's more reliable than external URLs
 const GoogleIcon = () => (
   <svg viewBox="0 0 48 48" className="h-5 w-5">
     <path
@@ -25,15 +31,64 @@ const GoogleIcon = () => (
     <path
       fill="#4CAF50"
       d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
-    />
-    <path
-      fill="#1976D2"
-      d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 35.853 44 30.138 44 24c0-1.341-.138-2.65-.389-3.917z"
-    />
+    ...
   </svg>
 );
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const verifyRequest = searchParams.get('verifyRequest');
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const result = await signIn('email', {
+        email,
+        redirect: false,
+        callbackUrl: '/dashboard',
+      });
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      // The verifyRequest page will be shown by NextAuth by default
+    } catch (error) {
+      toast({
+        title: 'Sign-in Failed',
+        description: (error as Error).message || 'An unknown error occurred.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (verifyRequest) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+        <Card className="w-full max-w-md shadow-2xl rounded-xl text-center">
+          <CardHeader>
+             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <CheckCircle className="h-8 w-8" />
+            </div>
+            <CardTitle className="text-3xl font-headline">Check your email</CardTitle>
+            <CardDescription>
+              A sign-in link has been sent to your email address.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Please check your inbox and click the link to complete the sign in process. You can close this tab.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <div className="w-full max-w-md">
@@ -47,10 +102,7 @@ export default function LoginPage() {
               The unified platform for campus venue booking.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="mb-6 text-center text-sm text-muted-foreground">
-              Sign in with your college Google account to continue.
-            </p>
+          <CardContent className="space-y-6">
             <Button
               size="lg"
               className="w-full"
@@ -59,6 +111,28 @@ export default function LoginPage() {
               <GoogleIcon />
               Sign in with Google
             </Button>
+            <div className="flex items-center space-x-2">
+              <Separator className="flex-1" />
+              <span className="text-xs text-muted-foreground">OR</span>
+              <Separator className="flex-1" />
+            </div>
+            <form onSubmit={handleEmailSignIn} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@college.edu"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Sending Link...' : 'Sign in with Email'}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
