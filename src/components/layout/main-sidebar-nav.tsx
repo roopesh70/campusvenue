@@ -29,7 +29,12 @@ interface NavProps {
 export function MainSidebarNav({ isCollapsed = false, userRole }: NavProps) {
   const pathname = usePathname();
 
-  const filteredNavLinks = navLinks.filter(link => !link.adminOnly || userRole === 'Admin');
+  const filteredNavLinks = navLinks.filter(link => {
+    if (link.adminOnly) {
+      return userRole === 'Admin';
+    }
+    return true;
+  });
 
   return (
     <>
