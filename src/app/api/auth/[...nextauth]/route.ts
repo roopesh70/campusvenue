@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
     EmailProvider({
       server: {
         host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
+        port: Number(process.env.EMAIL_SERVER_PORT),
         auth: {
           user: process.env.EMAIL_SERVER_USER,
           pass: process.env.EMAIL_SERVER_PASSWORD,
@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
     verifyRequest: '/login?verifyRequest=true', // (Optional) Custom page for showing "Check your email" message
   },
   session: {
-    strategy: 'jwt',
+    strategy: 'database',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
