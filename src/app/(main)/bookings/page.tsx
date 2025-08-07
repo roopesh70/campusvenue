@@ -8,9 +8,31 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/providers/auth-provider"
 import { useEffect, useState } from "react"
 import { Booking, Venue } from "@/lib/types"
+import { Skeleton } from "@/components/ui/skeleton"
+
+function BookingsPageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <Skeleton className="h-8 w-1/4" />
+        <Skeleton className="h-4 w-1/2 mt-2" />
+      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+             <Skeleton className="h-12 w-full" />
+             <Skeleton className="h-10 w-full" />
+             <Skeleton className="h-10 w-full" />
+             <Skeleton className="h-10 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
 export default function BookingsPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
   const [allVenues, setAllVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,8 +61,12 @@ export default function BookingsPage() {
     }
   };
   
-  if (loading) {
-    return <div>Loading your bookings...</div>
+  if (authLoading || (loading && user)) {
+    return <BookingsPageSkeleton />
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (

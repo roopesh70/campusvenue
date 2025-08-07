@@ -9,9 +9,40 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/components/providers/auth-provider"
 import { useEffect, useState } from "react"
 import { Booking, Venue } from "@/lib/types"
+import { Skeleton } from "@/components/ui/skeleton"
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+       <div>
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-4 w-1/3 mt-2" />
+      </div>
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+      </div>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-1/3" />
+           <Skeleton className="h-4 w-1/2 mt-1" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
   const [allVenues, setAllVenues] = useState<Venue[]>([]);
@@ -34,8 +65,13 @@ export default function DashboardPage() {
     fetchData();
   }, [user]);
 
-  if (loading || !user) {
-    return <div>Loading dashboard...</div>;
+  if (authLoading || (loading && user)) {
+    return <DashboardSkeleton />;
+  }
+
+  if (!user) {
+    // AuthProvider should handle redirection, but this is a safeguard.
+    return null;
   }
 
   const approvedCount = userBookings.filter(b => b.status === 'Approved').length;
