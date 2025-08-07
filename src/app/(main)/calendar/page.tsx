@@ -1,12 +1,6 @@
 import { getVenues, getEquipmentList, getVenueTypes, getBookings } from "@/lib/data";
 import type { Booking } from "@/lib/types";
-import dynamic from 'next/dynamic'
-import { Skeleton } from "@/components/ui/skeleton";
-
-const VenueCalendar = dynamic(() => import('@/components/venues/venue-calendar').then(mod => mod.VenueCalendar), {
-  ssr: false,
-  loading: () => <Skeleton className="h-[70vh] w-full" />,
-});
+import { CalendarClient } from "./calendar-client";
 
 
 export default async function CalendarPage() {
@@ -22,7 +16,7 @@ export default async function CalendarPage() {
         <h1 className="text-3xl font-headline tracking-tight">Venue Availability Calendar</h1>
         <p className="text-muted-foreground">View all bookings and events across campus venues.</p>
       </div>
-      <VenueCalendar 
+      <CalendarClient
         allVenues={allVenues}
         equipmentList={equipmentList}
         venueTypes={venueTypes}
