@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { Venue, Booking } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import {
@@ -35,12 +35,6 @@ export function VenueCalendar({
   const [equipment, setEquipment] = useState('all');
   const [building, setBuilding] = useState('all');
   const [floor, setFloor] = useState('all');
-
-  // isClient state to prevent hydration mismatch with FullCalendar
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true)
-  }, []);
 
   const uniqueBuildings = useMemo(() => [...new Set(allVenues.map(v => v.building))], [allVenues]);
   const uniqueFloors = useMemo(() => [...new Set(allVenues.map(v => v.floor.toString()))].sort((a,b) => parseInt(a) - parseInt(b)), [allVenues]);
@@ -86,10 +80,6 @@ export function VenueCalendar({
         };
       });
   }, [bookings, filteredVenues, allVenues]);
-
-  if (!isClient) {
-    return null; // or a loading skeleton
-  }
 
   return (
     <div className="flex-grow flex flex-col gap-4">

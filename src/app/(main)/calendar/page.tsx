@@ -1,6 +1,13 @@
 import { getVenues, getEquipmentList, getVenueTypes, getBookings } from "@/lib/data";
-import { VenueCalendar } from "@/components/venues/venue-calendar";
 import type { Booking } from "@/lib/types";
+import dynamic from 'next/dynamic'
+import { Skeleton } from "@/components/ui/skeleton";
+
+const VenueCalendar = dynamic(() => import('@/components/venues/venue-calendar').then(mod => mod.VenueCalendar), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[70vh] w-full" />,
+});
+
 
 export default async function CalendarPage() {
   const allVenues = await getVenues();
