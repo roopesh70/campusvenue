@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -13,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Projector, Wind, Thermometer, Tag, Building, Layers } from 'lucide-react';
+import { Users, Projector, Wind, Thermometer, Tag, Building, Layers, SearchX } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { BookingDialog } from './booking-dialog';
 import { Separator } from '../ui/separator';
@@ -47,6 +48,15 @@ export function VenueBrowser({
       return true;
     });
   }, [allVenues, capacity, type, equipment]);
+
+  const dummyVenues = [
+    "Main Auditorium",
+    "Dept. of CS Seminar Hall",
+    "College Ground",
+    "Sopanam Hall",
+    "ECE Seminar Hall",
+    "Main Conference Room"
+  ];
 
   return (
     <div className="space-y-8">
@@ -134,8 +144,17 @@ export function VenueBrowser({
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 text-muted-foreground">
-            <p>No venues match your criteria.</p>
+        <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+            <div className="flex justify-center mb-4">
+              <SearchX className="w-12 h-12 text-muted-foreground/50" />
+            </div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">No Venues Match Your Criteria</h3>
+            <p className="mb-4">Try adjusting your filters. Available venues include:</p>
+            <div className="flex flex-wrap justify-center gap-2 max-w-md mx-auto">
+              {dummyVenues.map(name => (
+                <Badge key={name} variant="outline">{name}</Badge>
+              ))}
+            </div>
         </div>
       )}
     </div>
