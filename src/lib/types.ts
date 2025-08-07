@@ -3,7 +3,7 @@ export type UserRole = 'Admin' | 'Faculty' | 'Club Leader' | 'Student';
 
 export type BookingStatus = 'Approved' | 'Pending' | 'Rejected' | 'Maintenance';
 
-export type VenueType = 'Classroom' | 'Lab' | 'Hall' | 'Auditorium' | 'Meeting Room';
+export type VenueType = 'Classroom' | 'Lab' | 'Hall' | 'Auditorium' | 'Meeting Room' | 'Outdoor';
 
 export interface User {
   id: string;
