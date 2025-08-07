@@ -34,6 +34,8 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { createBooking } from '@/lib/actions';
+
 
 const bookingFormSchema = z.object({
   eventName: z.string().min(3, 'Event name must be at least 3 characters.'),
@@ -63,13 +65,13 @@ export function BookingDialog({ venue }: { venue: Venue }) {
 
   async function onSubmit(values: z.infer<typeof bookingFormSchema>) {
     setIsChecking(true);
-    // Mock conflict check with 50% probability
-    const isConflict = Math.random() > 0.5;
+    
+    const result = await createBooking({ ...values, venueId: venue.id });
 
-    if (isConflict) {
-      toast({
+    if (result.error) {
+       toast({
         title: 'Conflict Detected!',
-        description: 'This time slot is unavailable. We are checking for alternative venues and times for you.',
+        description: result.error,
         variant: 'destructive',
       });
       try {
@@ -81,8 +83,8 @@ export function BookingDialog({ venue }: { venue: Venue }) {
           date: format(values.date, 'yyyy-MM-dd'),
           timeSlot: values.timeSlot,
         };
-        const result = await suggestAlternativeVenues(aiInput);
-        setAlternatives(result.alternativeVenues);
+        const aiResult = await suggestAlternativeVenues(aiInput);
+        setAlternatives(aiResult.alternativeVenues);
         setShowAlternatives(true);
         setIsOpen(false); // Close current booking dialog
       } catch (error) {
@@ -93,11 +95,10 @@ export function BookingDialog({ venue }: { venue: Venue }) {
           variant: 'destructive',
         });
       }
-    } else {
-      // Mock successful booking submission
+    } else if (result.success) {
       toast({
         title: 'Request Submitted',
-        description: `Your booking request for ${venue.name} has been sent for approval.`,
+        description: result.success,
       });
       setIsOpen(false);
       form.reset();
