@@ -1,3 +1,4 @@
+
 'use client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -10,9 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { signOut } from 'next-auth/react';
 import type { User } from '@/lib/types';
 import { LogOut, User as UserIcon } from 'lucide-react';
+import { auth } from '@/lib/firebase';
 
 export function UserNav({ user }: { user: User }) {
   const getInitials = (name?: string | null) => {
@@ -23,6 +24,10 @@ export function UserNav({ user }: { user: User }) {
     }
     return names[0].substring(0, 2);
   };
+  
+  const handleSignOut = () => {
+      auth.signOut();
+  }
 
   return (
     <DropdownMenu>
@@ -57,7 +62,7 @@ export function UserNav({ user }: { user: User }) {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })}>
+        <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
         </DropdownMenuItem>

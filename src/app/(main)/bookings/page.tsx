@@ -1,18 +1,35 @@
-import { getSession } from "@/lib/auth"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { getBookings, getVenues } from "@/lib/data"
+
+'use client'
+
+import { Card, CardContent } from "@/components/ui/card"
+import { getVenues, getUserBookings } from "@/lib/data"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/components/providers/auth-provider"
+import { useEffect, useState } from "react"
+import { Booking, Venue } from "@/lib/types"
 
-export default async function BookingsPage() {
-  const session = await getSession();
-  if (!session) return null;
+export default function BookingsPage() {
+  const { user } = useAuth();
+  const [userBookings, setUserBookings] = useState<Booking[]>([]);
+  const [allVenues, setAllVenues] = useState<Venue[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const allBookings = await getBookings();
-  const allVenues = await getVenues();
+  useEffect(() => {
+    async function fetchData() {
+      if (!user) return;
+      setLoading(true);
+      const [bookingsData, venuesData] = await Promise.all([
+          getUserBookings(user.id),
+          getVenues()
+      ]);
+      setUserBookings(bookingsData as Booking[]);
+      setAllVenues(venuesData);
+      setLoading(false);
+    }
+    fetchData();
+  }, [user]);
 
-  const userBookings = allBookings.filter(b => b.userId === session.user.id);
-  
   const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
         case 'Approved': return 'default';
@@ -21,6 +38,10 @@ export default async function BookingsPage() {
         default: return 'outline';
     }
   };
+  
+  if (loading) {
+    return <div>Loading your bookings...</div>
+  }
 
   return (
     <div className="space-y-6">

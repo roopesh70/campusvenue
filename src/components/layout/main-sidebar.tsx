@@ -1,12 +1,18 @@
+
+'use client'
+
 import Link from 'next/link';
 import { Building2 } from 'lucide-react';
-import type { User } from '@/lib/types';
 import { MainSidebarNav } from './main-sidebar-nav';
 import {
   TooltipProvider,
 } from '@/components/ui/tooltip';
+import { useAuth } from '../providers/auth-provider';
 
-export function MainSidebar({ user }: { user: User }) {
+
+export function MainSidebar() {
+  const { user } = useAuth();
+
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <TooltipProvider>
@@ -18,7 +24,7 @@ export function MainSidebar({ user }: { user: User }) {
             <Building2 className="h-4 w-4 transition-all group-hover:scale-110" />
             <span className="sr-only">CampusVenue</span>
           </Link>
-          <MainSidebarNav isCollapsed userRole={user.role} />
+          <MainSidebarNav isCollapsed userRole={user?.role} />
         </nav>
       </TooltipProvider>
     </aside>

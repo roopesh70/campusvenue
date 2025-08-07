@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -35,6 +36,7 @@ import { Calendar } from '../ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { createBooking } from '@/lib/actions';
+import { useAuth } from '../providers/auth-provider';
 
 
 const bookingFormSchema = z.object({
@@ -53,6 +55,7 @@ export function BookingDialog({ venue }: { venue: Venue }) {
   const [alternatives, setAlternatives] = useState<SuggestAlternativeVenuesOutput['alternativeVenues'] | null>(null);
   const [showAlternatives, setShowAlternatives] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<z.infer<typeof bookingFormSchema>>({
     resolver: zodResolver(bookingFormSchema),
@@ -64,9 +67,14 @@ export function BookingDialog({ venue }: { venue: Venue }) {
   });
 
   async function onSubmit(values: z.infer<typeof bookingFormSchema>) {
+    if (!user) {
+      toast({ title: 'Not Logged In', description: 'You must be logged in to create a booking.', variant: 'destructive' });
+      return;
+    }
+    
     setIsChecking(true);
     
-    const result = await createBooking({ ...values, venueId: venue.id });
+    const result = await createBooking({ ...values, venueId: venue.id, userId: user.id });
 
     if (result.error) {
        toast({

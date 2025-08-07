@@ -1,13 +1,14 @@
-import { getSession } from "@/lib/auth"
+
+'use client'
+import { useAuth } from "@/components/providers/auth-provider"
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ShieldCheck } from "lucide-react";
 
-export default async function AdminPage() {
-  const session = await getSession();
+export default function AdminPage() {
+  const { user } = useAuth();
 
-  if (session?.role !== 'Admin') {
-    // Redirect non-admin users to the dashboard
+  if (user?.role !== 'Admin') {
     redirect('/dashboard');
   }
 

@@ -1,6 +1,9 @@
-import type { Venue as PrismaVenue, Booking as PrismaBooking, UserRole, VenueType, BookingStatus } from '@prisma/client';
 
-export type { UserRole, VenueType, BookingStatus };
+export type UserRole = 'Admin' | 'Faculty' | 'Club Leader' | 'Student';
+
+export type BookingStatus = 'Approved' | 'Pending' | 'Rejected' | 'Maintenance';
+
+export type VenueType = 'Classroom' | 'Lab' | 'Hall' | 'Auditorium' | 'Meeting Room';
 
 export interface User {
   id: string;
@@ -10,8 +13,25 @@ export interface User {
   role: UserRole;
 }
 
-export interface Venue extends PrismaVenue {}
+export interface Venue {
+  id: string;
+  name: string;
+  type: VenueType;
+  capacity: number;
+  equipment: string[];
+  building: string;
+  floor: number;
+  imageUrl: string;
+}
 
-export interface Booking extends Omit<PrismaBooking, 'date'> {
-  date: string; // Keep date as string for simplicity in current components
+export interface Booking {
+  id: string;
+  userId: string;
+  venueId: string;
+  eventName: string;
+  eventDetails: string;
+  date: string;
+  timeSlot: string;
+  status: BookingStatus;
+  createdAt: any; // Firestore timestamp
 }

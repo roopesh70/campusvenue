@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -8,9 +9,12 @@ import { UserNav } from '@/components/layout/user-nav';
 import type { User } from '@/lib/types';
 import Link from 'next/link';
 import { Building2 } from 'lucide-react';
+import { useAuth } from '../providers/auth-provider';
 
 
-export function Header({ user }: { user: User }) {
+export function Header() {
+  const { user } = useAuth();
+  
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
       <Sheet>
@@ -29,12 +33,12 @@ export function Header({ user }: { user: User }) {
               <Building2 className="h-5 w-5 transition-all group-hover:scale-110" />
               <span className="sr-only">CampusVenue</span>
             </Link>
-            <MainSidebarNav userRole={user.role}/>
+            <MainSidebarNav userRole={user?.role}/>
           </nav>
         </SheetContent>
       </Sheet>
       <div className="relative ml-auto flex-1 md:grow-0" />
-      <UserNav user={user} />
+      {user && <UserNav user={user} />}
     </header>
   );
 }

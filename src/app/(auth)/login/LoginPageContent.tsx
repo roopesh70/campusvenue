@@ -2,8 +2,13 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -15,8 +20,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Building2, CheckCircle } from 'lucide-react';
+import { Building2, LogIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 48 48" className="h-5 w-5">
@@ -39,57 +45,82 @@ const GoogleIcon = () => (
   </svg>
 );
 
-function VerifyRequest() {
-  return (
-    <Card className="w-full max-w-md shadow-2xl rounded-xl text-center">
-      <CardHeader>
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <CheckCircle className="h-8 w-8" />
-        </div>
-        <CardTitle className="text-3xl font-headline">Check your email</CardTitle>
-        <CardDescription>
-          A sign-in link has been sent to your email address.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">
-          Please check your inbox and click the link to complete the sign in process. You can close this tab.
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
 
-function SignInForm() {
+function EmailSignInForm({ isSignUp = false }: { isSignUp?: boolean }) {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const result = await signIn('email', {
-        email,
-        redirect: false,
-        callbackUrl: '/dashboard',
-      });
-      if (result?.error) {
-        throw new Error(result.error);
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast({ title: 'Account created!', description: 'You can now sign in.' });
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
       }
-      if (!result?.ok) {
-        throw new Error("Could not send sign-in link. Please try again.");
-      }
-      // NextAuth handles the redirect to the verifyRequest page automatically.
-      // We don't need to manually redirect here.
-    } catch (error) {
+      // The AuthProvider will handle the redirect
+    } catch (error: any) {
       toast({
-        title: 'Sign-in Failed',
-        description: (error as Error).message || 'An unknown error occurred.',
+        title: 'Authentication Failed',
+        description: error.message,
         variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="email">Email Address</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="name@college.edu"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={isLoading}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
+        <Input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          disabled={isLoading}
+        />
+      </div>
+      <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+        {isLoading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+      </Button>
+    </form>
+  );
+}
+
+
+export default function LoginPageContent() {
+  const { toast } = useToast();
+
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      // The AuthProvider will handle the redirect
+    } catch (error: any) {
+      toast({
+        title: 'Sign-in Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -106,10 +137,9 @@ function SignInForm() {
       </CardHeader>
       <CardContent className="space-y-6">
         <Button
-          suppressHydrationWarning
           size="lg"
           className="w-full"
-          onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+          onClick={handleGoogleSignIn}
         >
           <GoogleIcon />
           Sign in with Google
@@ -119,32 +149,19 @@ function SignInForm() {
           <span className="text-xs text-muted-foreground">OR</span>
           <Separator className="flex-1" />
         </div>
-        <form onSubmit={handleEmailSignIn} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              suppressHydrationWarning
-              id="email"
-              type="email"
-              placeholder="name@college.edu"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
-          <Button suppressHydrationWarning type="submit" size="lg" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Sending Link...' : 'Sign in with Email'}
-          </Button>
-        </form>
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          <TabsContent value="signin" className="pt-4">
+            <EmailSignInForm />
+          </TabsContent>
+          <TabsContent value="signup" className="pt-4">
+            <EmailSignInForm isSignUp />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   )
-}
-
-export default function LoginPageContent() {
-  const searchParams = useSearchParams()
-  const isVerifyRequest = searchParams.get('verifyRequest') === 'true'
-
-  return isVerifyRequest ? <VerifyRequest /> : <SignInForm />
 }

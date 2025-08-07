@@ -1,9 +1,12 @@
+
 'use server';
 
 import { z } from 'zod';
-import prisma from '@/lib/prisma';
-import { getSession } from './auth';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
+import { getAuth } from "firebase/auth";
+
 
 const bookingFormSchema = z.object({
   eventName: z.string().min(3, 'Event name must be at least 3 characters.'),
@@ -12,47 +15,49 @@ const bookingFormSchema = z.object({
     required_error: "A date is required.",
   }),
   timeSlot: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]\s*-\s*([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format. Use HH:MM - HH:MM."),
-  venueId: z.string()
+  venueId: z.string(),
+  userId: z.string(),
 });
 
-export async function createBooking(values: z.infer<typeof bookingFormSchema>) {
-    const session = await getSession();
-    if (!session?.user) {
+export async function createBooking(values: Omit<z.infer<typeof bookingFormSchema>, 'userId'> & { userId: string } ) {
+
+    if (!values.userId) {
         return { error: 'You must be logged in to book a venue.' };
     }
 
     const validatedFields = bookingFormSchema.safeParse(values);
     if (!validatedFields.success) {
+        console.log(validatedFields.error.flatten().fieldErrors);
         return { error: 'Invalid input.' };
     }
 
-    const { venueId, date, timeSlot, eventName, eventDetails } = validatedFields.data;
+    const { venueId, date, timeSlot, eventName, eventDetails, userId } = validatedFields.data;
 
-    // TODO: More sophisticated time conflict check
-    const existingBooking = await prisma.booking.findFirst({
-        where: {
-            venueId,
-            date: date,
-            timeSlot,
-            status: { in: ['Approved', 'Pending'] }
-        },
-    });
+    // Firestore conflict check
+    const bookingsRef = collection(db, 'bookings');
+    const q = query(bookingsRef, 
+        where('venueId', '==', venueId),
+        where('date', '==', Timestamp.fromDate(date)),
+        where('timeSlot', '==', timeSlot),
+        where('status', 'in', ['Approved', 'Pending'])
+    );
 
-    if (existingBooking) {
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
         return { error: 'This time slot is already booked or pending approval.' };
     }
 
     try {
-        await prisma.booking.create({
-            data: {
-                userId: session.user.id,
-                venueId,
-                eventName,
-                eventDetails,
-                date,
-                timeSlot,
-                status: 'Pending',
-            },
+        await addDoc(collection(db, "bookings"), {
+            userId: userId,
+            venueId,
+            eventName,
+            eventDetails,
+            date: Timestamp.fromDate(date),
+            timeSlot,
+            status: 'Pending',
+            createdAt: Timestamp.now(),
         });
         
         revalidatePath('/bookings');

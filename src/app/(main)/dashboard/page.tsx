@@ -1,18 +1,43 @@
-import { getSession } from "@/lib/auth"
+
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { CheckCircle, Hourglass, XCircle, Users } from "lucide-react"
-import { getBookings, getVenues } from "@/lib/data"
+import { getBookings, getVenues, getUserBookings } from "@/lib/data"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/components/providers/auth-provider"
+import { useEffect, useState } from "react"
+import { Booking, Venue } from "@/lib/types"
 
-export default async function DashboardPage() {
-  const session = await getSession();
-  if (!session) return null;
+export default function DashboardPage() {
+  const { user } = useAuth();
+  const [userBookings, setUserBookings] = useState<Booking[]>([]);
+  const [allBookings, setAllBookings] = useState<Booking[]>([]);
+  const [allVenues, setAllVenues] = useState<Venue[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allBookings = await getBookings();
-  const allVenues = await getVenues();
+  useEffect(() => {
+    async function fetchData() {
+      if (!user) return;
+      setLoading(true);
+      const [userBookingsData, allBookingsData, venuesData] = await Promise.all([
+        getUserBookings(user.id),
+        getBookings(),
+        getVenues(),
+      ]);
+      setUserBookings(userBookingsData as Booking[]);
+      setAllBookings(allBookingsData as Booking[]);
+      setAllVenues(venuesData);
+      setLoading(false);
+    }
+    fetchData();
+  }, [user]);
 
-  const userBookings = allBookings.filter(b => b.userId === session.user.id);
+  if (loading || !user) {
+    return <div>Loading dashboard...</div>;
+  }
+
   const approvedCount = userBookings.filter(b => b.status === 'Approved').length;
   const pendingCount = userBookings.filter(b => b.status === 'Pending').length;
   const rejectedCount = userBookings.filter(b => b.status === 'Rejected').length;
@@ -35,7 +60,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-headline tracking-tight">Welcome back, {session.user.name?.split(' ')[0]}!</h1>
+        <h1 className="text-3xl font-headline tracking-tight">Welcome back, {user.name?.split(' ')[0]}!</h1>
         <p className="text-muted-foreground">Here's a summary of your activities.</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -69,7 +94,7 @@ export default async function DashboardPage() {
             <p className="text-xs text-muted-foreground">requests rejected</p>
           </CardContent>
         </Card>
-        {session.user.role === 'Admin' && (
+        {user.role === 'Admin' && (
           <Card className="bg-primary/10 border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Admin Approvals</CardTitle>

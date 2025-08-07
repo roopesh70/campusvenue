@@ -1,15 +1,5 @@
-export { default } from "next-auth/middleware"
 
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/genkit (Genkit routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - login (the login page)
-     */
-    '/((?!api/genkit|_next/static|_next/image|favicon.ico|login).*)',
-  ],
-};
+// This file is intentionally left empty. 
+// Firebase authentication is handled client-side and in the MainLayout.
+// Keeping this file prevents Next.js from throwing an error about a missing middleware file if it was previously configured.
+export default function middleware() {}
