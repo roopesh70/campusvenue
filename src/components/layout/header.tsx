@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { MainSidebarNav } from '@/components/layout/main-sidebar-nav';
 import { UserNav } from '@/components/layout/user-nav';
-import type { User } from '@/lib/auth';
+import type { User } from '@/lib/types';
 import Link from 'next/link';
 import { Building2 } from 'lucide-react';
 

@@ -1,20 +1,17 @@
-export interface Venue {
+import type { Venue as PrismaVenue, Booking as PrismaBooking, UserRole, VenueType, BookingStatus } from '@prisma/client';
+
+export type { UserRole, VenueType, BookingStatus };
+
+export interface User {
   id: string;
-  name: string;
-  type: 'Hall' | 'Lab' | 'Classroom';
-  capacity: number;
-  equipment: string[];
-  building: string;
-  floor: number;
-  imageUrl: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role: UserRole;
 }
 
-export interface Booking {
-  id: string;
-  venueId: string;
-  userId: string;
-  eventName: string;
-  date: string;
-  timeSlot: string;
-  status: 'Approved' | 'Pending' | 'Rejected';
+export interface Venue extends PrismaVenue {}
+
+export interface Booking extends Omit<PrismaBooking, 'date'> {
+  date: string; // Keep date as string for simplicity in current components
 }

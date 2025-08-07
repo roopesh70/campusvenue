@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Building2 } from 'lucide-react';
-import type { User } from '@/lib/auth';
+import type { User } from '@/lib/types';
 import { MainSidebarNav } from './main-sidebar-nav';
 import {
   TooltipProvider,

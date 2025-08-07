@@ -10,11 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { deleteSession, User } from '@/lib/auth';
+import { signOut } from 'next-auth/react';
+import type { User } from '@/lib/types';
 import { LogOut, User as UserIcon } from 'lucide-react';
 
 export function UserNav({ user }: { user: User }) {
-  const getInitials = (name: string) => {
+  const getInitials = (name?: string | null) => {
+    if (!name) return '??';
     const names = name.split(' ');
     if (names.length > 1) {
       return `${names[0][0]}${names[names.length - 1][0]}`;
@@ -27,11 +29,13 @@ export function UserNav({ user }: { user: User }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage
-              src={`https://placehold.co/40x40.png?text=${getInitials(user.name)}`}
-              alt={user.name}
-              data-ai-hint="avatar person"
-            />
+            {user.image && (
+              <AvatarImage
+                src={user.image}
+                alt={user.name ?? 'User Avatar'}
+                data-ai-hint="avatar person"
+              />
+            )}
             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
           </Avatar>
         </Button>
@@ -53,14 +57,10 @@ export function UserNav({ user }: { user: User }) {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <form action={deleteSession}>
-          <button type="submit" className="w-full">
-            <DropdownMenuItem>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </button>
-        </form>
+        <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
