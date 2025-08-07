@@ -35,14 +35,16 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
-    verifyRequest: '/login?verifyRequest=true', // (Optional) Custom page for showing "Check your email" message
+    verifyRequest: '/login?verifyRequest=true', // Custom page for showing "Check your email" message
   },
   session: {
     strategy: 'database',
   },
-  secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = NextAuth(authOptions);
+const handler = NextAuth({
+  ...authOptions,
+  secret: process.env.NEXTAUTH_SECRET,
+});
 
 export { handler as GET, handler as POST };
