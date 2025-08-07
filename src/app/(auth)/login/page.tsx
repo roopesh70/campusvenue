@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -10,12 +10,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Mail, CheckCircle } from 'lucide-react';
+import { Building2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const GoogleIcon = () => (
@@ -41,13 +40,32 @@ const GoogleIcon = () => (
   </>
 );
 
-export default function LoginPage() {
+function VerifyRequest() {
+  return (
+    <Card className="w-full max-w-md shadow-2xl rounded-xl text-center">
+      <CardHeader>
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <CheckCircle className="h-8 w-8" />
+        </div>
+        <CardTitle className="text-3xl font-headline">Check your email</CardTitle>
+        <CardDescription>
+          A sign-in link has been sent to your email address.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Please check your inbox and click the link to complete the sign in process. You can close this tab.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SignInForm() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const searchParams = useSearchParams();
-  const verifyRequest = searchParams.get('verifyRequest');
-
+  
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -60,7 +78,11 @@ export default function LoginPage() {
       if (result?.error) {
         throw new Error(result.error);
       }
-      // The verifyRequest page will be shown by NextAuth by default
+      if (!result?.ok) {
+        throw new Error("Could not send sign-in link. Please try again.");
+      }
+      // NextAuth handles the redirect to the verifyRequest page automatically.
+      // We don't need to manually redirect here.
     } catch (error) {
       toast({
         title: 'Sign-in Failed',
@@ -72,75 +94,72 @@ export default function LoginPage() {
     }
   };
 
+  return (
+    <Card className="shadow-2xl rounded-xl">
+      <CardHeader className="text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Building2 className="h-8 w-8" />
+        </div>
+        <CardTitle className="text-3xl font-headline">CampusVenue</CardTitle>
+        <CardDescription>
+          The unified platform for campus venue booking.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <Button
+          size="lg"
+          className="w-full"
+          onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+        >
+          <GoogleIcon />
+          Sign in with Google
+        </Button>
+        <div className="flex items-center space-x-2">
+          <Separator className="flex-1" />
+          <span className="text-xs text-muted-foreground">OR</span>
+          <Separator className="flex-1" />
+        </div>
+        <form onSubmit={handleEmailSignIn} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@college.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
+          <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Sending Link...' : 'Sign in with Email'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
+
+function LoginPageContent() {
+  const searchParams = useSearchParams();
+  const verifyRequest = searchParams.get('verifyRequest');
+
   if (verifyRequest) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-        <Card className="w-full max-w-md shadow-2xl rounded-xl text-center">
-          <CardHeader>
-             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <CheckCircle className="h-8 w-8" />
-            </div>
-            <CardTitle className="text-3xl font-headline">Check your email</CardTitle>
-            <CardDescription>
-              A sign-in link has been sent to your email address.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Please check your inbox and click the link to complete the sign in process. You can close this tab.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <VerifyRequest />;
   }
 
+  return <SignInForm />;
+}
+
+
+export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <div className="w-full max-w-md">
-        <Card className="shadow-2xl rounded-xl">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Building2 className="h-8 w-8" />
-            </div>
-            <CardTitle className="text-3xl font-headline">CampusVenue</CardTitle>
-            <CardDescription>
-              The unified platform for campus venue booking.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-            >
-              <GoogleIcon />
-              Sign in with Google
-            </Button>
-            <div className="flex items-center space-x-2">
-              <Separator className="flex-1" />
-              <span className="text-xs text-muted-foreground">OR</span>
-              <Separator className="flex-1" />
-            </div>
-            <form onSubmit={handleEmailSignIn} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@college.edu"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Sending Link...' : 'Sign in with Email'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        <Suspense fallback={<div>Loading...</div>}>
+          <LoginPageContent />
+        </Suspense>
       </div>
     </div>
   );
