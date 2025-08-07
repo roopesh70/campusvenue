@@ -3,7 +3,7 @@
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Menu, PlusCircle } from 'lucide-react';
 import { MainSidebarNav } from '@/components/layout/main-sidebar-nav';
 import { UserNav } from '@/components/layout/user-nav';
 import type { User } from '@/lib/types';
@@ -37,7 +37,14 @@ export function Header() {
           </nav>
         </SheetContent>
       </Sheet>
-      <div className="relative ml-auto flex-1 md:grow-0" />
+       <div className="relative ml-auto flex-1 md:grow-0">
+        <Button asChild>
+            <Link href="/venues">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Book a Venue
+            </Link>
+        </Button>
+      </div>
       {user && <UserNav user={user} />}
     </header>
   );
