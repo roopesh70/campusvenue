@@ -1,6 +1,6 @@
 import { getSession } from "@/lib/auth"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { bookings, venues } from "@/lib/data"
+import { getBookings, getVenues } from "@/lib/data"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 
@@ -8,7 +8,10 @@ export default async function BookingsPage() {
   const session = await getSession();
   if (!session) return null;
   
-  const userBookings = bookings.filter(b => b.userId === session.email);
+  const allBookings = await getBookings();
+  const allVenues = await getVenues();
+
+  const userBookings = allBookings.filter(b => b.userId === session.user.id);
   
   const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -38,7 +41,7 @@ export default async function BookingsPage() {
             </TableHeader>
             <TableBody>
               {userBookings.length > 0 ? userBookings.map(booking => {
-                const venue = venues.find(v => v.id === booking.venueId);
+                const venue = allVenues.find(v => v.id === booking.venueId);
                 return (
                 <TableRow key={booking.id}>
                   <TableCell className="font-medium">{booking.eventName}</TableCell>

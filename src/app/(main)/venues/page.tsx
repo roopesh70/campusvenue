@@ -1,7 +1,11 @@
-import { venues, equipmentList, venueTypes } from "@/lib/data";
+import { getVenues, getEquipmentList, getVenueTypes } from "@/lib/data";
 import { VenueBrowser } from "@/components/venues/venue-browser";
 
-export default function VenuesPage() {
+export default async function VenuesPage() {
+  const allVenues = await getVenues();
+  const equipmentList = await getEquipmentList();
+  const venueTypes = await getVenueTypes();
+
   return (
     <div className="space-y-6">
        <div>
@@ -9,7 +13,7 @@ export default function VenuesPage() {
         <p className="text-muted-foreground">Browse and book available venues across the campus.</p>
       </div>
       <VenueBrowser 
-        allVenues={venues}
+        allVenues={allVenues}
         equipmentList={equipmentList}
         venueTypes={venueTypes}
       />

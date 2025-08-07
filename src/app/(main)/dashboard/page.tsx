@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/auth"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { CheckCircle, Hourglass, XCircle, Users } from "lucide-react"
-import { bookings, venues } from "@/lib/data"
+import { getBookings, getVenues } from "@/lib/data"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 
@@ -9,7 +9,10 @@ export default async function DashboardPage() {
   const session = await getSession();
   if (!session) return null;
 
-  const userBookings = bookings.filter(b => b.userId === session.email);
+  const allBookings = await getBookings();
+  const allVenues = await getVenues();
+
+  const userBookings = allBookings.filter(b => b.userId === session.user.id);
   const approvedCount = userBookings.filter(b => b.status === 'Approved').length;
   const pendingCount = userBookings.filter(b => b.status === 'Pending').length;
   const rejectedCount = userBookings.filter(b => b.status === 'Rejected').length;
@@ -18,7 +21,7 @@ export default async function DashboardPage() {
     .filter(b => b.status === 'Approved' && new Date(b.date) >= new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-  const totalPendingForAdmin = bookings.filter(b => b.status === 'Pending').length;
+  const totalPendingForAdmin = allBookings.filter(b => b.status === 'Pending').length;
 
   const getBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -32,7 +35,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-headline tracking-tight">Welcome back, {session.name.split(' ')[0]}!</h1>
+        <h1 className="text-3xl font-headline tracking-tight">Welcome back, {session.user.name?.split(' ')[0]}!</h1>
         <p className="text-muted-foreground">Here's a summary of your activities.</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -66,7 +69,7 @@ export default async function DashboardPage() {
             <p className="text-xs text-muted-foreground">requests rejected</p>
           </CardContent>
         </Card>
-        {session.role === 'Admin' && (
+        {session.user.role === 'Admin' && (
           <Card className="bg-primary/10 border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Admin Approvals</CardTitle>
@@ -99,7 +102,7 @@ export default async function DashboardPage() {
               {upcomingBookings.length > 0 ? upcomingBookings.map(booking => (
                 <TableRow key={booking.id}>
                   <TableCell className="font-medium">{booking.eventName}</TableCell>
-                  <TableCell>{venues.find(v => v.id === booking.venueId)?.name}</TableCell>
+                  <TableCell>{allVenues.find(v => v.id === booking.venueId)?.name}</TableCell>
                   <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
                   <TableCell>{booking.timeSlot}</TableCell>
                 </TableRow>
