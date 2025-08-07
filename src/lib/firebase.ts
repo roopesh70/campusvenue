@@ -13,19 +13,13 @@ import { getFirestore } from 'firebase/firestore';
 // 4. Find your web app and copy the `firebaseConfig` object.
 // 5. Paste the values here, replacing the placeholder strings.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_AUTH_DOMAIN_HERE",
-  projectId: "YOUR_PROJECT_ID_HERE",
-  storageBucket: "YOUR_STORAGE_BUCKET_HERE",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
-  appId: "YOUR_APP_ID_HERE",
+  apiKey: "AIzaSyDVEQa7TGINV1jZuxqw3tLZ2VUTVPTB9gM",
+  authDomain: "campusvenue.firebaseapp.com",
+  projectId: "campusvenue",
+  storageBucket: "campusvenue.firebasestorage.app",
+  messagingSenderId: "681578752192",
+  appId: "1:681578752192:web:871776dda3bd3bb2f9a525"
 };
-
-
-// A check to ensure credentials have been added.
-if (firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
-  console.error("Firebase config is not set. Please update src/lib/firebase.ts with your project credentials.");
-}
 
 
 // Initialize Firebase
