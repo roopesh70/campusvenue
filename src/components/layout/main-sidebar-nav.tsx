@@ -12,11 +12,13 @@ import {
   DoorOpen,
   CalendarCheck,
   ShieldCheck,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
   { href: '/venues', label: 'Venues', icon: DoorOpen, adminOnly: false },
+  { href: '/calendar', label: 'Calendar', icon: CalendarIcon, adminOnly: false },
   { href: '/bookings', label: 'My Bookings', icon: CalendarCheck, adminOnly: false },
   { href: '/admin', label: 'Admin', icon: ShieldCheck, adminOnly: true },
 ];

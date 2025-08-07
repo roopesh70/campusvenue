@@ -57,3 +57,69 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* FullCalendar Customizations */
+@layer components {
+  .fc {
+    /* General */
+    --fc-border-color: hsl(var(--border));
+    --fc-today-bg-color: hsla(var(--primary) / 0.1);
+    --fc-event-bg-color: hsl(var(--primary));
+    --fc-event-border-color: hsl(var(--primary));
+    --fc-event-text-color: hsl(var(--primary-foreground));
+    --fc-event-selected-overlay-color: hsla(var(--primary) / 0.25);
+    
+    /* Buttons */
+    .fc-button {
+      @apply bg-primary text-primary-foreground;
+    }
+    .fc-button:hover {
+      @apply bg-primary/90;
+    }
+    .fc-button-primary:not(:disabled).fc-button-active,
+    .fc-button-primary:not(:disabled):active {
+      @apply bg-primary/90;
+    }
+    
+    /* Header Toolbar */
+    .fc-toolbar-title {
+      @apply text-lg font-bold text-foreground;
+    }
+    
+    /* Event Colors */
+    .fc-event[data-status="Approved"] {
+      --fc-event-bg-color: hsl(var(--primary));
+      --fc-event-border-color: hsl(var(--primary));
+    }
+    .fc-event[data-status="Pending"] {
+      --fc-event-bg-color: hsl(var(--secondary));
+      --fc-event-border-color: hsl(var(--secondary));
+       --fc-event-text-color: hsl(var(--secondary-foreground));
+    }
+     .fc-event[data-status="Maintenance"] {
+      --fc-event-bg-color: hsl(var(--muted));
+      --fc-event-border-color: hsl(var(--muted));
+      --fc-event-text-color: hsl(var(--muted-foreground));
+    }
+    .fc-event[data-status="Rejected"] {
+       display: none;
+    }
+
+    .fc-daygrid-event {
+      @apply whitespace-normal rounded-md p-1 text-xs;
+    }
+
+    .fc-event-main {
+      @apply p-0.5;
+    }
+
+    .fc-event-time {
+      @apply font-semibold;
+    }
+  }
+  .dark .fc {
+    --fc-event-bg-color: hsl(var(--primary));
+    --fc-event-border-color: hsl(var(--primary));
+    --fc-event-text-color: hsl(var(--primary-foreground));
+  }
+}
