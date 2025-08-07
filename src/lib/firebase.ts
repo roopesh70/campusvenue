@@ -4,8 +4,14 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // --- IMPORTANT ---
-// Replace these placeholder values with your actual Firebase project credentials.
-// You can find these in your Firebase project settings under "Project settings".
+// To register your app with Firebase, you must replace these placeholder values
+// with the actual configuration details from your Firebase project.
+//
+// 1. Go to your Firebase project console: https://console.firebase.google.com/
+// 2. Click the gear icon (⚙️) to go to "Project settings".
+// 3. In the "General" tab, scroll down to the "Your apps" section.
+// 4. Find your web app and copy the `firebaseConfig` object.
+// 5. Paste the values here, replacing the placeholder strings.
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY_HERE",
   authDomain: "YOUR_AUTH_DOMAIN_HERE",
