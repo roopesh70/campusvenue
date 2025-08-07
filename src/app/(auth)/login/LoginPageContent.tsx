@@ -58,7 +58,7 @@ function EmailSignInForm({ isSignUp = false }: { isSignUp?: boolean }) {
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password);
-        toast({ title: 'Account created!', description: 'You can now sign in.' });
+        toast({ title: 'Account created!', description: 'You have been signed in.' });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
