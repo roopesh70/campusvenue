@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase/firestore';
 
 // --- IMPORTANT ---
 // Replace these placeholder values with your actual Firebase project credentials.
-// You can find these in your Firebase project settings.
+// You can find these in your Firebase project settings under "Project settings".
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY_HERE",
   authDomain: "YOUR_AUTH_DOMAIN_HERE",
