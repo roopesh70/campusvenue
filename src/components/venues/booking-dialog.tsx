@@ -46,7 +46,6 @@ const bookingFormSchema = z.object({
     required_error: "A date is required.",
   }),
   timeSlot: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]\s*-\s*([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format. Use HH:MM - HH:MM."),
-  document: z.any().optional(),
 });
 
 export function BookingDialog({ venue }: { venue: Venue }) {
@@ -211,19 +210,6 @@ export function BookingDialog({ venue }: { venue: Venue }) {
                   )}
                 />
               </div>
-               <FormField
-                control={form.control}
-                name="document"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Supporting Document (PDF/Image)</FormLabel>
-                    <FormControl>
-                      <Input type="file" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <DialogFooter>
                 <Button type="submit" disabled={isChecking}>
                   {isChecking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
