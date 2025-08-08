@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "seed:firestore": "node scripts/seed-firestore.js"
+    "seed:firestore": "node scripts/seed-firestore.js",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.15",
